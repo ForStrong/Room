@@ -3,19 +3,20 @@ package com.ianf.room1;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
+
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    WordDataBase wordDataBase;
-    WordDao wordDao;
-    Button btnInsert, btnDelete, btnClear, btnUpdate;
-    TextView textView;
-    LiveData<List<Word>> wordsLive;
 
+    Button btnInsert, btnDelete, btnClear, btnUpdate;
+    RecyclerView recyclerView;
+    MyAdapter adapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,28 +25,54 @@ public class MainActivity extends AppCompatActivity {
         btnClear = findViewById(R.id.buttonClear);
         btnUpdate = findViewById(R.id.buttonUpdate);
         btnDelete = findViewById(R.id.buttonDelete);
-        textView = findViewById(R.id.textView);
+        recyclerView = findViewById(R.id.recyclerView);
+        adapter = new MyAdapter();
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         final WordViewModel wordViewModel = new WordViewModel(getApplication());
-        wordDataBase = WordDataBase.getWordDataBse(this);
-        wordDao = wordDataBase.getWordDao();
-        wordsLive = wordDao.getAllWords();
+
         wordViewModel.getWordList().observe(this, new Observer<List<Word>>() {
             @Override
             public void onChanged(List<Word> words) {
-                StringBuilder text = new StringBuilder();
-                for (int i = 0; i < words.size(); i++) {
-                    Word word = words.get(i);
-                    text.append(word.getId()).append(":").append(word.getWord()).append(" = ").append(word.getChineseMessage()).append("\n");
-                }
-                textView.setText(text.toString());
+                adapter.setAllWords(words);
+                adapter.notifyDataSetChanged();
             }
         });
         btnInsert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Word word = new Word("Hello", "你好");
-                Word word1 = new Word("World", "世界");
-                wordViewModel.insertWords(word,word1);
+                String[] english = {
+                        "Hello",
+                        "World",
+                        "Android",
+                        "Google",
+                        "Studio",
+                        "Project",
+                        "Database",
+                        "Recycler",
+                        "View",
+                        "String",
+                        "Value",
+                        "Integer"
+                };
+                String[] chinese = {
+                        "你好",
+                        "世界",
+                        "安卓系统",
+                        "谷歌公司",
+                        "工作室",
+                        "项目",
+                        "数据库",
+                        "回收站",
+                        "视图",
+                        "字符串",
+                        "价值",
+                        "整数类型"
+                };
+               for(int i = 0; i < english.length ; i++){
+                   Word word = new Word(english[i],chinese[i]);
+                   wordViewModel.insertWords(word);
+               }
             }
         });
 
